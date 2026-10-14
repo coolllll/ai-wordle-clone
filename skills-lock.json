@@ -1,11 +1,29 @@
 {
   "version": 1,
   "skills": {
+    "requesting-code-review": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "skillPath": "skills/requesting-code-review/SKILL.md",
+      "computedHash": "5d367c9d0d5bcd5794e8c072977803c55e96b87fa6a9b776889f894524834ee2"
+    },
+    "systematic-debugging": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "skillPath": "skills/systematic-debugging/SKILL.md",
+      "computedHash": "276fb0aadb002ab930cc2a56de89e16995a2e3e70b33587652bf0a5fb123148d"
+    },
     "tailwind-v4": {
       "source": "mastra-ai/mastra",
       "sourceType": "github",
       "skillPath": ".claude/skills/tailwind-v4/SKILL.md",
       "computedHash": "5a9f44a4151a8020309435f6f7d36e7b8ef1e66b00e0ad962cad677cd5c3155a"
+    },
+    "verification-before-completion": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "skillPath": "skills/verification-before-completion/SKILL.md",
+      "computedHash": "b529822bdac4b197b180fe12225cff86b930b65910435103c10622df7f041651"
     }
   }
 }

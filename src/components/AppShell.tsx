@@ -31,6 +31,12 @@ export function AppShell({
         >
           History
         </Link>
+        <Link
+          href="/leaderboard"
+          className="inline-flex items-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary"
+        >
+          Leaderboard
+        </Link>
       </header>
       <main className="mx-auto w-full max-w-lg overflow-x-hidden px-3 py-4">
         {children}

@@ -7,3 +7,4 @@
 
 - เขียนเนื้อหาใน OpenSpec proposal เป็นภาษาไทยเสมอ
 - คงหัวข้อโครงสร้างมาตรฐานของ OpenSpec, capability identifiers, ชื่อโค้ด และศัพท์เทคนิคเป็นภาษาอังกฤษเมื่อจำเป็นต่อ parser หรือความถูกต้อง
+- ตอนรัน `/opsx-archive` หรือ `openspec archive` ห้ามสร้างหรือสลับ git branch ให้ archive บน branch ปัจจุบันเลย

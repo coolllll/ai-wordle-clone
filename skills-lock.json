@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "tailwind-v4": {
+      "source": "mastra-ai/mastra",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/tailwind-v4/SKILL.md",
+      "computedHash": "5a9f44a4151a8020309435f6f7d36e7b8ef1e66b00e0ad962cad677cd5c3155a"
+    }
+  }
+}

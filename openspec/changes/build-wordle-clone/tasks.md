@@ -1,47 +1,47 @@
 # Tasks
 
-## 1. Application Setup
+## 1. ตั้งค่าแอปพลิเคชัน
 
-- [ ] 1.1 Scaffold a Next.js App Router project with TypeScript, linting, and the source-directory layout, and verify the development server renders the initial page
-- [ ] 1.2 Install and configure Tailwind CSS and daisyUI with an application theme, and verify a daisyUI component renders with the selected theme
-- [ ] 1.3 Configure unit and component test tooling with a smoke test, and verify the test command exits successfully
+- [ ] 1.1 สร้างโครงโปรเจกต์ Next.js App Router พร้อม TypeScript, linting และโครงสร้าง source directory แล้วตรวจสอบว่า development server แสดงหน้าเริ่มต้นได้
+- [ ] 1.2 ติดตั้งและตั้งค่า Tailwind CSS กับ daisyUI พร้อม theme ของแอป แล้วตรวจสอบว่า component ของ daisyUI แสดงผลด้วย theme ที่เลือก
+- [ ] 1.3 ตั้งค่าเครื่องมือสำหรับ unit test และ component test พร้อม smoke test แล้วตรวจสอบว่าคำสั่ง test ทำงานสำเร็จ
 
-## 2. Game Rules and Word Data
+## 2. กติกาเกมและข้อมูลคำศัพท์
 
-- [ ] 2.1 Add JSON answer and allowed-guess word lists plus typed loading and normalization, and verify tests reject malformed, duplicate, and non-five-letter entries
-- [ ] 2.2 Implement pure repeated-letter evaluation using exact matches before present matches, and verify unit tests cover correct, present, absent, and excess duplicate letters
-- [ ] 2.3 Implement game creation, guess validation, attempt tracking, scoring, and win/loss transitions, and verify unit tests cover invalid guesses, wins on attempts 1 through 6, and sixth-attempt failure
-- [ ] 2.4 Implement public game projections that conceal active answers and reveal completed answers, and verify serialization tests never expose an active answer
+- [ ] 2.1 เพิ่มรายการคำตอบและคำที่อนุญาตให้ทายในรูปแบบ JSON พร้อม typed loading และ normalization แล้วตรวจสอบด้วย test ว่าข้อมูลผิดรูปแบบ คำซ้ำ และคำที่ไม่ได้มีห้าตัวอักษรถูกปฏิเสธ
+- [ ] 2.2 สร้าง pure function สำหรับประเมินตัวอักษรซ้ำ โดยตรวจ exact match ก่อน present match แล้วตรวจสอบด้วย unit test ให้ครอบคลุม correct, present, absent และตัวอักษรซ้ำที่เกินจำนวนในคำตอบ
+- [ ] 2.3 สร้างการเริ่มเกม การตรวจสอบคำทาย การนับจำนวนครั้ง คะแนน และการเปลี่ยนสถานะชนะหรือแพ้ แล้วตรวจสอบด้วย unit test ให้ครอบคลุมคำทายที่ไม่ถูกต้อง การชนะในครั้งที่ 1 ถึง 6 และการแพ้ในครั้งที่ 6
+- [ ] 2.4 สร้าง public game projection ที่ซ่อนคำตอบของเกมที่ยังเล่นอยู่และเปิดเผยคำตอบเมื่อเกมจบ แล้วตรวจสอบด้วย serialization test ว่าคำตอบของเกมที่ยังเล่นไม่ถูกเปิดเผย
 
-## 3. Local JSON Persistence
+## 3. การบันทึกข้อมูลใน JSON บนเครื่อง
 
-- [ ] 3.1 Define and validate the persisted game-data schema with safe empty-file initialization, and verify storage tests load empty and valid data
-- [ ] 3.2 Implement serialized atomic JSON writes through temporary-file replacement, and verify temporary-directory tests preserve prior data when a write fails
-- [ ] 3.3 Persist active and completed game records with idempotent completion, and verify restart and repeated-completion tests produce one durable record per game
-- [ ] 3.4 Implement newest-first history projection with attempt-count scores for wins and no score for failures, and verify storage tests cover ordering and both result types
+- [ ] 3.1 กำหนดและตรวจสอบ schema ของข้อมูลเกมที่บันทึก พร้อมการสร้างไฟล์ว่างอย่างปลอดภัย แล้วตรวจสอบด้วย storage test ว่าโหลดข้อมูลว่างและข้อมูลที่ถูกต้องได้
+- [ ] 3.2 สร้างการเขียน JSON แบบ serialized และ atomic ด้วยการแทนที่ temporary file แล้วตรวจสอบด้วย test ใน temporary directory ว่าข้อมูลเดิมยังคงอยู่เมื่อเขียนไฟล์ล้มเหลว
+- [ ] 3.3 บันทึกเกมที่กำลังเล่นและเกมที่จบแล้วโดยให้การจบเกมเป็นแบบ idempotent แล้วตรวจสอบด้วย test การ restart และการจบเกมซ้ำว่าแต่ละเกมมี durable record เพียงรายการเดียว
+- [ ] 3.4 สร้าง history projection ที่เรียงจากใหม่ไปเก่า โดยเกมที่ชนะใช้จำนวนครั้งที่ทายเป็นคะแนนและเกมที่แพ้ไม่มีคะแนน แล้วตรวจสอบด้วย storage test ให้ครอบคลุมลำดับและผลลัพธ์ทั้งสองแบบ
 
 ## 4. Server API
 
-- [ ] 4.1 Add the game-creation Route Handler with random answer selection, and verify API tests return a new public game without its answer
-- [ ] 4.2 Add game retrieval and guess-submission Route Handlers with input validation and explicit error responses, and verify API tests cover restore, valid guesses, invalid guesses, missing games, and completed games
-- [ ] 4.3 Add the history Route Handler, and verify API tests return completed records newest first with the required fields
-- [ ] 4.4 Map storage failures to safe API errors without overwriting valid data, and verify API tests do not claim success when persistence fails
+- [ ] 4.1 เพิ่ม Route Handler สำหรับสร้างเกมและสุ่มคำตอบ แล้วตรวจสอบด้วย API test ว่า response เป็น public game ใหม่ที่ไม่มีคำตอบ
+- [ ] 4.2 เพิ่ม Route Handlers สำหรับดึงข้อมูลเกมและส่งคำทาย พร้อม input validation และ error response ที่ชัดเจน แล้วตรวจสอบด้วย API test ให้ครอบคลุมการกู้คืนเกม คำทายที่ถูกต้อง คำทายที่ไม่ถูกต้อง เกมที่ไม่พบ และเกมที่จบแล้ว
+- [ ] 4.3 เพิ่ม Route Handler สำหรับประวัติ แล้วตรวจสอบด้วย API test ว่า response มีรายการเกมที่จบแล้วเรียงจากใหม่ไปเก่าและมีข้อมูลที่กำหนดครบถ้วน
+- [ ] 4.4 แปลง storage failure เป็น API error ที่ปลอดภัยโดยไม่เขียนทับข้อมูลที่ถูกต้อง แล้วตรวจสอบด้วย API test ว่าระบบไม่รายงานว่าสำเร็จเมื่อบันทึกข้อมูลล้มเหลว
 
-## 5. Gameplay Interface
+## 5. UI สำหรับเล่นเกม
 
-- [ ] 5.1 Build the responsive daisyUI page shell, game board, and tile states, and verify component tests render six five-cell rows without horizontal overflow at a narrow viewport
-- [ ] 5.2 Implement shared input state for physical and on-screen keyboards, including delete, submit, length limits, and pending-state protection, and verify component tests exercise both input methods
-- [ ] 5.3 Connect game creation, restoration, and guess submission to the API, and verify a component integration test covers starting, reloading, and continuing a game
-- [ ] 5.4 Display validation errors, tile feedback, keyboard knowledge, and win/loss results, and verify component tests cover an invalid word, a winning guess, and a failed sixth guess
-- [ ] 5.5 Add the unlimited “new game” flow after completion, and verify consecutive games can start without refreshing the page
+- [ ] 5.1 สร้าง page shell, กระดานเกม และสถานะ tile ด้วย daisyUI ให้รองรับหลายขนาดหน้าจอ แล้วตรวจสอบด้วย component test ว่าแสดงหกแถว แถวละห้าช่อง โดยไม่มี horizontal overflow บน viewport ขนาดเล็ก
+- [ ] 5.2 สร้าง input state ที่ใช้ร่วมกันสำหรับ physical keyboard และ on-screen keyboard รวมถึง delete, submit, การจำกัดความยาว และการป้องกัน input ระหว่างรอ แล้วตรวจสอบด้วย component test ให้ครอบคลุม input ทั้งสองแบบ
+- [ ] 5.3 เชื่อมการสร้างเกม การกู้คืนเกม และการส่งคำทายเข้ากับ API แล้วตรวจสอบด้วย component integration test ให้ครอบคลุมการเริ่มเกม reload หน้า และเล่นเกมต่อ
+- [ ] 5.4 แสดง validation error, tile feedback, สถานะ keyboard และผลชนะหรือแพ้ แล้วตรวจสอบด้วย component test ให้ครอบคลุมคำที่ไม่ถูกต้อง คำทายที่ชนะ และคำทายครั้งที่หกที่ทำให้แพ้
+- [ ] 5.5 เพิ่ม flow “เกมใหม่” แบบไม่จำกัดหลังเกมจบ แล้วตรวจสอบว่าสามารถเริ่มเกมต่อเนื่องได้โดยไม่ต้อง refresh หน้า
 
-## 6. Score History Interface
+## 6. UI ประวัติคะแนน
 
-- [ ] 6.1 Build a responsive history view showing date, result, score, answer, and ordered guesses, and verify component tests cover empty, won, and failed histories
-- [ ] 6.2 Refresh history after a game completes and display persistence errors clearly, and verify component tests cover successful save feedback and a failed-save message
+- [ ] 6.1 สร้างหน้าประวัติที่รองรับหลายขนาดหน้าจอและแสดงวันที่ ผลลัพธ์ คะแนน คำตอบ และคำทายตามลำดับ แล้วตรวจสอบด้วย component test ให้ครอบคลุมประวัติว่าง เกมที่ชนะ และเกมที่แพ้
+- [ ] 6.2 refresh ประวัติหลังเกมจบและแสดง persistence error อย่างชัดเจน แล้วตรวจสอบด้วย component test ให้ครอบคลุม feedback เมื่อบันทึกสำเร็จและข้อความเมื่อบันทึกล้มเหลว
 
-## 7. Integration Verification
+## 7. การตรวจสอบการทำงานร่วมกัน
 
-- [ ] 7.1 Add an end-to-end local gameplay test covering a valid win, history persistence, page reload, and starting another game, and verify it passes against the production-style server
-- [ ] 7.2 Document local installation, development, testing, production start, JSON data locations, and the single-process limitation in README.md, and verify every documented command runs as written
-- [ ] 7.3 Run formatting, linting, type checking, all tests, and the production build, and resolve any failures until every command exits successfully
+- [ ] 7.1 เพิ่ม end-to-end test สำหรับการเล่นบนเครื่อง ให้ครอบคลุมการชนะที่ถูกต้อง การบันทึกประวัติ การ reload หน้า และการเริ่มเกมใหม่ แล้วตรวจสอบว่า test ผ่านเมื่อทำงานกับ production-style server
+- [ ] 7.2 เขียน README.md อธิบายการติดตั้งบนเครื่อง การพัฒนา การทดสอบ การเริ่ม production ตำแหน่งข้อมูล JSON และข้อจำกัดของการทำงานแบบ process เดียว แล้วตรวจสอบว่าทุกคำสั่งในเอกสารทำงานได้ตามที่ระบุ
+- [ ] 7.3 รัน formatting, linting, type checking, test ทั้งหมด และ production build แล้วแก้ทุกปัญหาจนทุกคำสั่งทำงานสำเร็จ

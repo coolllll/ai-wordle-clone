@@ -2,33 +2,33 @@
 
 ## Why
 
-Create a local single-player Wordle-style game that supports unlimited play and preserves completed-game results. The project is currently empty, so this change establishes the full playable application and its initial architecture.
+สร้างเกมทายคำสไตล์ Wordle แบบผู้เล่นคนเดียวที่ทำงานบนเครื่อง รองรับการเล่นได้ไม่จำกัดและเก็บผลการแข่งขันที่จบแล้ว เนื่องจากโปรเจกต์ยังไม่มีโค้ดแอปพลิเคชัน change นี้จึงวางโครงสร้างเริ่มต้นและสร้างแอปพลิเคชันที่เล่นได้ครบถ้วน
 
 ## What Changes
 
-- Add a Next.js full-stack application using the App Router and TypeScript.
-- Add a responsive Wordle-style interface built with Tailwind CSS and daisyUI.
-- Add unlimited random five-letter games with six attempts per game.
-- Validate guesses and calculate correct, present, and absent letter feedback on the server.
-- Add physical and on-screen keyboard input.
-- Persist completed-game history in a local JSON file.
-- Use the number of attempts as the score for wins and record losses as failed.
-- Add a history view showing each game's date, result, score, answer, and guesses.
+- เพิ่มแอปพลิเคชัน full-stack ด้วย Next.js App Router และ TypeScript
+- เพิ่ม UI สไตล์ Wordle ที่รองรับหลายขนาดหน้าจอด้วย Tailwind CSS และ daisyUI
+- เพิ่มเกมสุ่มคำศัพท์ห้าตัวอักษร เล่นได้ไม่จำกัด โดยแต่ละเกมทายได้หกครั้ง
+- ตรวจสอบคำที่ทายและคำนวณสถานะตัวอักษรเป็น correct, present หรือ absent บน server
+- รองรับการกรอกข้อมูลผ่าน physical keyboard และ on-screen keyboard
+- บันทึกประวัติเกมที่จบแล้วลงไฟล์ JSON ในเครื่อง
+- ใช้จำนวนครั้งที่ทายเป็นคะแนนเมื่อชนะ และบันทึกเกมที่แพ้เป็น failed
+- เพิ่มหน้าประวัติที่แสดงวันที่ ผลลัพธ์ คะแนน คำตอบ และคำที่ทายของแต่ละเกม
 
 ## Capabilities
 
 ### New Capabilities
 
-- `wordle-gameplay`: Covers starting random games, entering and validating guesses, evaluating letters, completing games, and presenting the interactive game interface.
-- `score-history`: Covers recording completed games in local JSON storage and viewing persistent results and attempt-based scores.
+- `wordle-gameplay`: ครอบคลุมการเริ่มเกมแบบสุ่ม การกรอกและตรวจสอบคำที่ทาย การประเมินสถานะตัวอักษร การจบเกม และ UI สำหรับเล่นเกม
+- `score-history`: ครอบคลุมการบันทึกเกมที่จบแล้วใน JSON บนเครื่อง และการดูผลลัพธ์กับคะแนนตามจำนวนครั้งที่ทาย
 
 ### Modified Capabilities
 
-None.
+ไม่มี
 
 ## Impact
 
-- Introduces the Next.js application structure, server endpoints or actions, React UI, and automated tests.
-- Adds Tailwind CSS and daisyUI as UI dependencies.
-- Adds local JSON word-list and history data files with server-side file access.
-- The application targets local execution on a single Node.js process; writable JSON persistence is not intended for serverless deployment or concurrent multi-instance use.
+- เพิ่มโครงสร้างแอปพลิเคชัน Next.js, server endpoints หรือ actions, React UI และ automated tests
+- เพิ่ม Tailwind CSS และ daisyUI เป็น dependencies สำหรับ UI
+- เพิ่มไฟล์ JSON สำหรับรายการคำศัพท์และประวัติเกม โดยเข้าถึงไฟล์จากฝั่ง server
+- แอปพลิเคชันออกแบบให้ทำงานบนเครื่องด้วย Node.js process เดียว การบันทึก JSON แบบเขียนไฟล์ไม่รองรับ serverless deployment หรือการทำงานพร้อมกันหลาย instance

@@ -1,4 +1,4 @@
-import type { HistoryEntry, PublicGame } from "./types";
+import type { PublicGame } from "./types";
 
 export const GAME_ID_KEY = "word-guess-game-id";
 
@@ -53,14 +53,6 @@ export async function submitGuessRequest(
     throw new Error(await errorMessage(response));
   }
   return (await response.json()) as PublicGame;
-}
-
-export async function fetchHistory(): Promise<HistoryEntry[]> {
-  const response = await fetch("/api/history", { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(await errorMessage(response));
-  }
-  return (await response.json()) as HistoryEntry[];
 }
 
 export function loadCurrentGame(): Promise<PublicGame> {

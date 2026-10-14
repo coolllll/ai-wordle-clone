@@ -3,16 +3,14 @@
 import { useEffect, useState } from "react";
 import { buildBoard } from "@/lib/board";
 import {
-  fetchHistory,
   loadCurrentGame,
   startNewGame,
   submitGuessRequest,
 } from "@/lib/client-api";
 import { keyboardStates } from "@/lib/feedback";
 import { applyDraftInput } from "@/lib/input";
-import type { HistoryEntry, PublicGame } from "@/lib/types";
+import type { PublicGame } from "@/lib/types";
 import { GameBoard } from "./GameBoard";
-import { HistoryList } from "./HistoryList";
 import { Keyboard } from "./Keyboard";
 
 interface AlertMessage {
@@ -25,8 +23,6 @@ export function GameClient() {
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
   const [alert, setAlert] = useState<AlertMessage | null>(null);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [historyVersion, setHistoryVersion] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,30 +47,6 @@ export function GameClient() {
       cancelled = true;
     };
   }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchHistory()
-      .then((entries) => {
-        if (!cancelled) {
-          setHistory(entries);
-        }
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          setAlert({
-            kind: "error",
-            text:
-              error instanceof Error
-                ? error.message
-                : "The latest result was not saved.",
-          });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [historyVersion]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -116,7 +88,6 @@ export function GameClient() {
       setDraft("");
       if (updated.status !== "playing") {
         setAlert({ kind: "success", text: "Result saved" });
-        setHistoryVersion((version) => version + 1);
       }
     } catch (error) {
       setAlert({
@@ -198,10 +169,6 @@ export function GameClient() {
           New game
         </button>
       ) : null}
-      <section data-testid="history-panel" className="overflow-x-hidden">
-        <h2 className="mb-2 text-lg font-bold">Recent games</h2>
-        <HistoryList entries={history} />
-      </section>
     </div>
   );
 }

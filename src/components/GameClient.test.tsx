@@ -3,7 +3,7 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GAME_ID_KEY, resetClientCache } from "@/lib/client-api";
-import type { HistoryEntry, PublicGame, TileState } from "@/lib/types";
+import type { PublicGame, TileState } from "@/lib/types";
 import { GameClient } from "./GameClient";
 
 const absent = [
@@ -26,6 +26,15 @@ function playing(
     createdAt: "2026-01-01T00:00:00.000Z",
     completedAt: null,
   };
+}
+
+function expectNoHistoryRequest(): void {
+  const fetchMock = vi.mocked(globalThis.fetch);
+  const historyUrls = fetchMock.mock.calls
+    .map((call) => String(call[0]))
+    .filter((url) => url.endsWith("/api/history"));
+  expect(historyUrls).toEqual([]);
+  expect(screen.queryByTestId("history-panel")).not.toBeInTheDocument();
 }
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -60,9 +69,6 @@ describe("GameClient input", () => {
             releaseGuess = resolve;
           });
         }
-        if (url.endsWith("/api/history")) {
-          return jsonResponse([]);
-        }
         if (init?.method === "POST") {
           return jsonResponse(playing());
         }
@@ -72,6 +78,7 @@ describe("GameClient input", () => {
 
     render(<GameClient />);
     await screen.findByText("Attempts remaining: 6");
+    expectNoHistoryRequest();
 
     await user.click(screen.getByTestId("key-c"));
     await user.keyboard("r");
@@ -120,9 +127,6 @@ describe("GameClient play", () => {
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input);
-        if (url.endsWith("/api/history")) {
-          return jsonResponse([]);
-        }
         if (url === "/api/games" && init?.method === "POST") {
           return jsonResponse(playing("game-1"));
         }
@@ -145,6 +149,7 @@ describe("GameClient play", () => {
 
     const first = render(<GameClient />);
     await screen.findByText("Attempts remaining: 6");
+    expectNoHistoryRequest();
     expect(window.localStorage.getItem(GAME_ID_KEY)).toBe("game-1");
     first.unmount();
     resetClientCache();
@@ -177,9 +182,6 @@ describe("GameClient play", () => {
             400,
           );
         }
-        if (url.endsWith("/api/history")) {
-          return jsonResponse([]);
-        }
         if (init?.method === "POST") {
           return jsonResponse(playing());
         }
@@ -195,6 +197,7 @@ describe("GameClient play", () => {
     );
     expect(screen.getByText("Attempts remaining: 6")).toBeInTheDocument();
     expect(screen.getByTestId("tile-0-0")).toHaveTextContent("z");
+    expectNoHistoryRequest();
   });
 
   it("shows a win and starts another game without reloading the page", async () => {
@@ -202,25 +205,11 @@ describe("GameClient play", () => {
     const reload = vi.fn();
     vi.stubGlobal("location", { ...window.location, reload });
     let created = 0;
-    let historyCalls = 0;
-    const history: HistoryEntry[] = [];
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input);
-        if (url.endsWith("/api/history")) {
-          historyCalls += 1;
-          return jsonResponse(history);
-        }
         if (url.endsWith("/guesses")) {
-          history.push({
-            id: "game-1",
-            completedAt: "2026-04-01T00:00:00.000Z",
-            result: "won",
-            score: 1,
-            answer: "crane",
-            guesses: ["crane"],
-          });
           return jsonResponse({
             id: "game-1",
             status: "won",
@@ -248,15 +237,13 @@ describe("GameClient play", () => {
 
     render(<GameClient />);
     await screen.findByText("Attempts remaining: 6");
+    expectNoHistoryRequest();
     await user.keyboard("crane{Enter}");
     expect(await screen.findByTestId("alert")).toHaveTextContent(
       "Result saved",
     );
     expect(screen.getByTestId("status")).toHaveTextContent("You won. Score: 1");
-    await waitFor(() =>
-      expect(screen.getByTestId("history-result")).toHaveTextContent("won"),
-    );
-    expect(historyCalls).toBeGreaterThan(1);
+    expectNoHistoryRequest();
     expect(reload).not.toHaveBeenCalled();
 
     await user.click(screen.getByTestId("new-game"));
@@ -278,9 +265,6 @@ describe("GameClient play", () => {
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input);
-        if (url.endsWith("/api/history")) {
-          return jsonResponse([]);
-        }
         if (url.endsWith("/guesses")) {
           return jsonResponse({
             id: "game-1",
@@ -310,19 +294,15 @@ describe("GameClient play", () => {
     expect(await screen.findByTestId("alert")).toHaveTextContent(
       "Result saved",
     );
+    expectNoHistoryRequest();
   });
 
   it("shows a persistence error and does not claim the result was saved", async () => {
     const user = userEvent.setup();
-    let historyCalls = 0;
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input);
-        if (url.endsWith("/api/history")) {
-          historyCalls += 1;
-          return jsonResponse([]);
-        }
         if (url.endsWith("/guesses")) {
           return jsonResponse(
             { error: "The latest result was not saved." },
@@ -338,13 +318,13 @@ describe("GameClient play", () => {
 
     render(<GameClient />);
     await screen.findByText("Attempts remaining: 6");
-    const callsBeforeGuess = historyCalls;
+    expectNoHistoryRequest();
     await user.keyboard("crane{Enter}");
     expect(await screen.findByTestId("alert")).toHaveTextContent(
       "The latest result was not saved.",
     );
     expect(screen.queryByText("Result saved")).not.toBeInTheDocument();
-    expect(historyCalls).toBe(callsBeforeGuess);
+    expectNoHistoryRequest();
     expect(screen.getByText("Attempts remaining: 6")).toBeInTheDocument();
   });
 });

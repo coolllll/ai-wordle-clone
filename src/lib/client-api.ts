@@ -2,7 +2,11 @@ import type { PublicGame } from "./types";
 
 export const GAME_ID_KEY = "word-guess-game-id";
 
-let currentLoad: Promise<PublicGame> | null = null;
+let currentLoad: { userId: string; promise: Promise<PublicGame> } | null = null;
+
+export function gameStorageKey(userId: string): string {
+  return `${GAME_ID_KEY}:${userId}`;
+}
 
 export function resetClientCache(): void {
   currentLoad = null;
@@ -55,27 +59,31 @@ export async function submitGuessRequest(
   return (await response.json()) as PublicGame;
 }
 
-export function loadCurrentGame(): Promise<PublicGame> {
-  if (!currentLoad) {
-    currentLoad = (async () => {
-      const existing = window.localStorage.getItem(GAME_ID_KEY);
-      if (existing) {
-        const restored = await fetchGame(existing);
-        if (restored) {
-          return restored;
+export function loadCurrentGame(userId: string): Promise<PublicGame> {
+  if (!currentLoad || currentLoad.userId !== userId) {
+    const key = gameStorageKey(userId);
+    currentLoad = {
+      userId,
+      promise: (async () => {
+        const existing = window.localStorage.getItem(key);
+        if (existing) {
+          const restored = await fetchGame(existing);
+          if (restored) {
+            return restored;
+          }
         }
-      }
-      const created = await createGameRequest();
-      window.localStorage.setItem(GAME_ID_KEY, created.id);
-      return created;
-    })();
+        const created = await createGameRequest();
+        window.localStorage.setItem(key, created.id);
+        return created;
+      })(),
+    };
   }
-  return currentLoad;
+  return currentLoad.promise;
 }
 
-export async function startNewGame(): Promise<PublicGame> {
+export async function startNewGame(userId: string): Promise<PublicGame> {
   const created = await createGameRequest();
-  window.localStorage.setItem(GAME_ID_KEY, created.id);
-  currentLoad = Promise.resolve(created);
+  window.localStorage.setItem(gameStorageKey(userId), created.id);
+  currentLoad = { userId, promise: Promise.resolve(created) };
   return created;
 }

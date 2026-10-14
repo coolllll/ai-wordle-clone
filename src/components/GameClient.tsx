@@ -18,7 +18,7 @@ interface AlertMessage {
   text: string;
 }
 
-export function GameClient() {
+export function GameClient({ userId }: { userId: string }) {
   const [game, setGame] = useState<PublicGame | null>(null);
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
@@ -26,7 +26,7 @@ export function GameClient() {
 
   useEffect(() => {
     let cancelled = false;
-    loadCurrentGame()
+    loadCurrentGame(userId)
       .then((loaded) => {
         if (!cancelled) {
           setGame(loaded);
@@ -46,7 +46,7 @@ export function GameClient() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -107,7 +107,7 @@ export function GameClient() {
     setAlert(null);
     setDraft("");
     try {
-      setGame(await startNewGame());
+      setGame(await startNewGame(userId));
     } catch (error) {
       setAlert({
         kind: "error",

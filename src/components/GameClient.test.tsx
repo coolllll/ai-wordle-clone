@@ -2,7 +2,7 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { GAME_ID_KEY, resetClientCache } from "@/lib/client-api";
+import { gameStorageKey, resetClientCache } from "@/lib/client-api";
 import type { PublicGame, TileState } from "@/lib/types";
 import { GameClient } from "./GameClient";
 
@@ -76,7 +76,7 @@ describe("GameClient input", () => {
       }),
     );
 
-    render(<GameClient />);
+    render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 6");
     expectNoHistoryRequest();
 
@@ -120,6 +120,30 @@ describe("GameClient input", () => {
 });
 
 describe("GameClient play", () => {
+  it("keeps a separate saved game for each account", async () => {
+    let created = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        if (init?.method === "POST") {
+          created += 1;
+          return jsonResponse(playing(created === 1 ? "game-a" : "game-b"));
+        }
+        return jsonResponse({ error: "Game not found." }, 404);
+      }),
+    );
+
+    const first = render(<GameClient userId="ada" />);
+    await screen.findByText("Attempts remaining: 6");
+    first.unmount();
+    resetClientCache();
+
+    render(<GameClient userId="bea" />);
+    await screen.findByText("Attempts remaining: 6");
+    expect(window.localStorage.getItem(gameStorageKey("ada"))).toBe("game-a");
+    expect(window.localStorage.getItem(gameStorageKey("bea"))).toBe("game-b");
+  });
+
   it("starts a game, restores it after reload, and continues", async () => {
     const user = userEvent.setup();
     const restored = playing("game-1", [{ word: "slate", tiles: absent }]);
@@ -147,14 +171,14 @@ describe("GameClient play", () => {
       }),
     );
 
-    const first = render(<GameClient />);
+    const first = render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 6");
     expectNoHistoryRequest();
-    expect(window.localStorage.getItem(GAME_ID_KEY)).toBe("game-1");
+    expect(window.localStorage.getItem(gameStorageKey("player"))).toBe("game-1");
     first.unmount();
     resetClientCache();
 
-    render(<GameClient />);
+    render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 5");
     expect(screen.getByTestId("tile-0-0")).toHaveTextContent("s");
 
@@ -189,7 +213,7 @@ describe("GameClient play", () => {
       }),
     );
 
-    render(<GameClient />);
+    render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 6");
     await user.keyboard("zzzzz{Enter}");
     expect(await screen.findByTestId("alert")).toHaveTextContent(
@@ -235,7 +259,7 @@ describe("GameClient play", () => {
       }),
     );
 
-    render(<GameClient />);
+    render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 6");
     expectNoHistoryRequest();
     await user.keyboard("crane{Enter}");
@@ -248,7 +272,7 @@ describe("GameClient play", () => {
 
     await user.click(screen.getByTestId("new-game"));
     await screen.findByText("Attempts remaining: 6");
-    expect(window.localStorage.getItem(GAME_ID_KEY)).toBe("game-2");
+    expect(window.localStorage.getItem(gameStorageKey("player"))).toBe("game-2");
     expect(screen.getByTestId("tile-0-0")).toHaveTextContent("");
     expect(reload).not.toHaveBeenCalled();
   });
@@ -283,7 +307,7 @@ describe("GameClient play", () => {
       }),
     );
 
-    render(<GameClient />);
+    render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 1");
     await user.keyboard("peach{Enter}");
     expect(await screen.findByTestId("status")).toHaveTextContent(
@@ -316,7 +340,7 @@ describe("GameClient play", () => {
       }),
     );
 
-    render(<GameClient />);
+    render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 6");
     expectNoHistoryRequest();
     await user.keyboard("crane{Enter}");

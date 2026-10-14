@@ -14,7 +14,7 @@ test("wins, records history, reloads, and starts another game", async ({
   await page.getByLabel("Username").fill("player");
   await page.getByLabel("Password").fill("secret-pass");
   await page.getByRole("button", { name: "Create account" }).click();
-  await page.goto("/");
+  await page.waitForURL("/");
   await expect(page.getByTestId("board-row")).toHaveCount(6);
   await expect(page.getByTestId("status")).toContainText(
     "Attempts remaining: 6",

@@ -127,6 +127,11 @@ function toPublic(user: UserRecord): PublicAccount {
   return { id: user.id, username: user.username };
 }
 
+export async function listPublicAccounts(): Promise<PublicAccount[]> {
+  const store = await readUsers();
+  return store.users.map(toPublic);
+}
+
 async function readUsers(): Promise<UserStore> {
   try {
     const text = await fs.readFile(usersFile(), "utf8");

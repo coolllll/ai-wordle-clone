@@ -40,14 +40,17 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
 1. **Understand the request and clarify material ambiguity**
 
-   If no input is provided, ask the user (open-ended, no preset options):
-   > "What change do you want to work on? Describe what you want to build or fix."
+   **Planning interview gate (`grill-me`):**
+
+   Invoke the `grill-me` skill. Do not copy the `grilling` interview procedure into this file. `grill-me` delegates to `grilling`. Ask the person in Thai.
+
+   - If the request has no description of what to build or fix, or it is only a change name, ask what they want to build or fix and wait. Start `grill-me` only after a description exists.
+   - When a description exists, run `grill-me` before `openspec new change`. Do not create the change or its planning artifacts until the person confirms shared understanding.
+   - After that confirmation, create the change and write the planning artifacts without a separate permission to write.
 
    From their description, derive a kebab-case name (e.g., "add user authentication" → `add-user-auth`).
 
    **IMPORTANT**: Do NOT proceed without understanding what the user wants to build.
-
-   If the request contains ambiguity that would materially affect scope, externally observable behavior, compatibility, or acceptance criteria, ask the user before creating the change. For minor details, make a reasonable assumption and record it in the planning artifacts.
 
 2. **Load project context**
 

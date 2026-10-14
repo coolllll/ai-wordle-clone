@@ -2,7 +2,12 @@ import * as fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { authenticate, registerAccount, usersFile } from "./accounts";
+import {
+  authenticate,
+  listPublicAccounts,
+  registerAccount,
+  usersFile,
+} from "./accounts";
 
 const directories: string[] = [];
 
@@ -70,5 +75,26 @@ describe("authenticate", () => {
     await expect(authenticate("nobody", "secret-pass")).rejects.toThrow(
       /incorrect/,
     );
+  });
+});
+
+describe("listPublicAccounts", () => {
+  it("returns ids and usernames without password material", async () => {
+    await useTempDir();
+    await registerAccount("ada", "secret-pass");
+    await registerAccount("bea", "other-pass");
+
+    const accounts = await listPublicAccounts();
+
+    expect(accounts).toEqual([
+      expect.objectContaining({ username: "ada" }),
+      expect.objectContaining({ username: "bea" }),
+    ]);
+    for (const account of accounts) {
+      expect(Object.keys(account).sort()).toEqual(["id", "username"]);
+    }
+    expect(JSON.stringify(accounts)).not.toContain("secret-pass");
+    expect(JSON.stringify(accounts)).not.toContain("passwordHash");
+    expect(JSON.stringify(accounts)).not.toContain("passwordSalt");
   });
 });

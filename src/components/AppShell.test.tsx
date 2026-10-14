@@ -18,6 +18,8 @@ describe("AppShell", () => {
     expect(screen.getByRole("button", { name: "Log out" })).toBeInTheDocument();
     const history = screen.getByRole("link", { name: "History" });
     expect(history).toHaveAttribute("href", "/history");
+    const leaderboard = screen.getByRole("link", { name: "Leaderboard" });
+    expect(leaderboard).toHaveAttribute("href", "/leaderboard");
     expect(history.className).not.toContain("btn");
     expect(history.className).not.toContain("btn-primary");
     expect(document.documentElement.innerHTML).toContain("Play");

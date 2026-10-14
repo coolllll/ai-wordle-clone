@@ -7,8 +7,14 @@ test("wins, records history, reloads, and starts another game", async ({
   page,
 }) => {
   fs.rmSync(path.join(e2eDataDir, "games.json"), { force: true });
+  fs.rmSync(path.join(e2eDataDir, "users.json"), { force: true });
+  fs.rmSync(path.join(e2eDataDir, "session-secret"), { force: true });
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto("/");
+  await page.goto("/register");
+  await page.getByLabel("Username").fill("player");
+  await page.getByLabel("Password").fill("secret-pass");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await page.waitForURL("/");
   await expect(page.getByTestId("board-row")).toHaveCount(6);
   await expect(page.getByTestId("status")).toContainText(
     "Attempts remaining: 6",

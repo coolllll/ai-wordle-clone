@@ -1,16 +1,34 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({
+  children,
+  username,
+}: {
+  children: ReactNode;
+  username: string;
+}) {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-base-200 text-base-content">
-      <header className="navbar bg-base-100 px-3 shadow-sm">
+    <div className="min-h-screen overflow-x-hidden bg-page text-ink">
+      <header className="flex items-center gap-2 bg-surface px-3 py-2 shadow-sm">
         <div className="flex-1">
           <Link href="/" className="text-lg font-bold">
             Word Guess
           </Link>
         </div>
-        <Link href="/history" className="btn btn-primary btn-sm">
+        <span data-testid="current-user">{username}</span>
+        <form action="/api/logout" method="post">
+          <button
+            type="submit"
+            className="rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-semibold"
+          >
+            Log out
+          </button>
+        </form>
+        <Link
+          href="/history"
+          className="inline-flex items-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary"
+        >
           History
         </Link>
       </header>

@@ -11,6 +11,7 @@ export interface EvaluatedGuess {
 
 export interface GameRecord {
   id: string;
+  userId?: string;
   answer: string;
   guesses: EvaluatedGuess[];
   status: GameStatus;

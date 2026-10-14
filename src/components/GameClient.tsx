@@ -3,16 +3,14 @@
 import { useEffect, useState } from "react";
 import { buildBoard } from "@/lib/board";
 import {
-  fetchHistory,
   loadCurrentGame,
   startNewGame,
   submitGuessRequest,
 } from "@/lib/client-api";
 import { keyboardStates } from "@/lib/feedback";
 import { applyDraftInput } from "@/lib/input";
-import type { HistoryEntry, PublicGame } from "@/lib/types";
+import type { PublicGame } from "@/lib/types";
 import { GameBoard } from "./GameBoard";
-import { HistoryList } from "./HistoryList";
 import { Keyboard } from "./Keyboard";
 
 interface AlertMessage {
@@ -20,17 +18,15 @@ interface AlertMessage {
   text: string;
 }
 
-export function GameClient() {
+export function GameClient({ userId }: { userId: string }) {
   const [game, setGame] = useState<PublicGame | null>(null);
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
   const [alert, setAlert] = useState<AlertMessage | null>(null);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [historyVersion, setHistoryVersion] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    loadCurrentGame()
+    loadCurrentGame(userId)
       .then((loaded) => {
         if (!cancelled) {
           setGame(loaded);
@@ -50,31 +46,7 @@ export function GameClient() {
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchHistory()
-      .then((entries) => {
-        if (!cancelled) {
-          setHistory(entries);
-        }
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          setAlert({
-            kind: "error",
-            text:
-              error instanceof Error
-                ? error.message
-                : "The latest result was not saved.",
-          });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [historyVersion]);
+  }, [userId]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -116,7 +88,6 @@ export function GameClient() {
       setDraft("");
       if (updated.status !== "playing") {
         setAlert({ kind: "success", text: "Result saved" });
-        setHistoryVersion((version) => version + 1);
       }
     } catch (error) {
       setAlert({
@@ -136,7 +107,7 @@ export function GameClient() {
     setAlert(null);
     setDraft("");
     try {
-      setGame(await startNewGame());
+      setGame(await startNewGame(userId));
     } catch (error) {
       setAlert({
         kind: "error",
@@ -173,7 +144,11 @@ export function GameClient() {
         <div
           role="alert"
           data-testid="alert"
-          className={`alert ${alert.kind === "error" ? "alert-error" : "alert-success"}`}
+          className={`rounded-md border px-4 py-3 ${
+            alert.kind === "error"
+              ? "border-on-error bg-error text-on-error"
+              : "border-on-success bg-success text-on-success"
+          }`}
         >
           <span>{alert.text}</span>
         </div>
@@ -187,17 +162,13 @@ export function GameClient() {
       {game.status !== "playing" ? (
         <button
           type="button"
-          className="btn btn-primary"
+          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 font-semibold text-on-primary"
           data-testid="new-game"
           onClick={() => void onNewGame()}
         >
           New game
         </button>
       ) : null}
-      <section data-testid="history-panel" className="overflow-x-hidden">
-        <h2 className="mb-2 text-lg font-bold">Recent games</h2>
-        <HistoryList entries={history} />
-      </section>
     </div>
   );
 }

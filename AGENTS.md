@@ -19,3 +19,4 @@
 - เขียนเนื้อหาใน OpenSpec proposal เป็นภาษาไทยเสมอ
 - คงหัวข้อโครงสร้างมาตรฐานของ OpenSpec, capability identifiers, ชื่อโค้ด และศัพท์เทคนิคเป็นภาษาอังกฤษเมื่อจำเป็นต่อ parser หรือความถูกต้อง
 - ตอนรัน `/opsx-archive` หรือ `openspec archive` ห้ามสร้างหรือสลับ git branch ให้ archive บน branch ปัจจุบันเลย
+- ตอน archive ถ้า change มี delta spec ให้ sync เข้า main specs ก่อนเสมอ แล้วค่อย archive โดยไม่ถามว่าจะ sync หรือไม่ หยุดเฉพาะเมื่อ sync ทำไม่ได้ เช่น requirement ที่แก้ไม่มี spec หลักให้แก้

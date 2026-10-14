@@ -2,8 +2,8 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { GAME_ID_KEY, resetClientCache } from "@/lib/client-api";
-import type { HistoryEntry, PublicGame, TileState } from "@/lib/types";
+import { gameStorageKey, resetClientCache } from "@/lib/client-api";
+import type { PublicGame, TileState } from "@/lib/types";
 import { GameClient } from "./GameClient";
 
 const absent = [
@@ -26,6 +26,15 @@ function playing(
     createdAt: "2026-01-01T00:00:00.000Z",
     completedAt: null,
   };
+}
+
+function expectNoHistoryRequest(): void {
+  const fetchMock = vi.mocked(globalThis.fetch);
+  const historyUrls = fetchMock.mock.calls
+    .map((call) => String(call[0]))
+    .filter((url) => url.endsWith("/api/history"));
+  expect(historyUrls).toEqual([]);
+  expect(screen.queryByTestId("history-panel")).not.toBeInTheDocument();
 }
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -60,9 +69,6 @@ describe("GameClient input", () => {
             releaseGuess = resolve;
           });
         }
-        if (url.endsWith("/api/history")) {
-          return jsonResponse([]);
-        }
         if (init?.method === "POST") {
           return jsonResponse(playing());
         }
@@ -70,8 +76,9 @@ describe("GameClient input", () => {
       }),
     );
 
-    render(<GameClient />);
+    render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 6");
+    expectNoHistoryRequest();
 
     await user.click(screen.getByTestId("key-c"));
     await user.keyboard("r");
@@ -113,6 +120,30 @@ describe("GameClient input", () => {
 });
 
 describe("GameClient play", () => {
+  it("keeps a separate saved game for each account", async () => {
+    let created = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        if (init?.method === "POST") {
+          created += 1;
+          return jsonResponse(playing(created === 1 ? "game-a" : "game-b"));
+        }
+        return jsonResponse({ error: "Game not found." }, 404);
+      }),
+    );
+
+    const first = render(<GameClient userId="ada" />);
+    await screen.findByText("Attempts remaining: 6");
+    first.unmount();
+    resetClientCache();
+
+    render(<GameClient userId="bea" />);
+    await screen.findByText("Attempts remaining: 6");
+    expect(window.localStorage.getItem(gameStorageKey("ada"))).toBe("game-a");
+    expect(window.localStorage.getItem(gameStorageKey("bea"))).toBe("game-b");
+  });
+
   it("starts a game, restores it after reload, and continues", async () => {
     const user = userEvent.setup();
     const restored = playing("game-1", [{ word: "slate", tiles: absent }]);
@@ -120,9 +151,6 @@ describe("GameClient play", () => {
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input);
-        if (url.endsWith("/api/history")) {
-          return jsonResponse([]);
-        }
         if (url === "/api/games" && init?.method === "POST") {
           return jsonResponse(playing("game-1"));
         }
@@ -143,13 +171,14 @@ describe("GameClient play", () => {
       }),
     );
 
-    const first = render(<GameClient />);
+    const first = render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 6");
-    expect(window.localStorage.getItem(GAME_ID_KEY)).toBe("game-1");
+    expectNoHistoryRequest();
+    expect(window.localStorage.getItem(gameStorageKey("player"))).toBe("game-1");
     first.unmount();
     resetClientCache();
 
-    render(<GameClient />);
+    render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 5");
     expect(screen.getByTestId("tile-0-0")).toHaveTextContent("s");
 
@@ -177,9 +206,6 @@ describe("GameClient play", () => {
             400,
           );
         }
-        if (url.endsWith("/api/history")) {
-          return jsonResponse([]);
-        }
         if (init?.method === "POST") {
           return jsonResponse(playing());
         }
@@ -187,7 +213,7 @@ describe("GameClient play", () => {
       }),
     );
 
-    render(<GameClient />);
+    render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 6");
     await user.keyboard("zzzzz{Enter}");
     expect(await screen.findByTestId("alert")).toHaveTextContent(
@@ -195,6 +221,7 @@ describe("GameClient play", () => {
     );
     expect(screen.getByText("Attempts remaining: 6")).toBeInTheDocument();
     expect(screen.getByTestId("tile-0-0")).toHaveTextContent("z");
+    expectNoHistoryRequest();
   });
 
   it("shows a win and starts another game without reloading the page", async () => {
@@ -202,25 +229,11 @@ describe("GameClient play", () => {
     const reload = vi.fn();
     vi.stubGlobal("location", { ...window.location, reload });
     let created = 0;
-    let historyCalls = 0;
-    const history: HistoryEntry[] = [];
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input);
-        if (url.endsWith("/api/history")) {
-          historyCalls += 1;
-          return jsonResponse(history);
-        }
         if (url.endsWith("/guesses")) {
-          history.push({
-            id: "game-1",
-            completedAt: "2026-04-01T00:00:00.000Z",
-            result: "won",
-            score: 1,
-            answer: "crane",
-            guesses: ["crane"],
-          });
           return jsonResponse({
             id: "game-1",
             status: "won",
@@ -246,22 +259,20 @@ describe("GameClient play", () => {
       }),
     );
 
-    render(<GameClient />);
+    render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 6");
+    expectNoHistoryRequest();
     await user.keyboard("crane{Enter}");
     expect(await screen.findByTestId("alert")).toHaveTextContent(
       "Result saved",
     );
     expect(screen.getByTestId("status")).toHaveTextContent("You won. Score: 1");
-    await waitFor(() =>
-      expect(screen.getByTestId("history-result")).toHaveTextContent("won"),
-    );
-    expect(historyCalls).toBeGreaterThan(1);
+    expectNoHistoryRequest();
     expect(reload).not.toHaveBeenCalled();
 
     await user.click(screen.getByTestId("new-game"));
     await screen.findByText("Attempts remaining: 6");
-    expect(window.localStorage.getItem(GAME_ID_KEY)).toBe("game-2");
+    expect(window.localStorage.getItem(gameStorageKey("player"))).toBe("game-2");
     expect(screen.getByTestId("tile-0-0")).toHaveTextContent("");
     expect(reload).not.toHaveBeenCalled();
   });
@@ -278,9 +289,6 @@ describe("GameClient play", () => {
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input);
-        if (url.endsWith("/api/history")) {
-          return jsonResponse([]);
-        }
         if (url.endsWith("/guesses")) {
           return jsonResponse({
             id: "game-1",
@@ -299,7 +307,7 @@ describe("GameClient play", () => {
       }),
     );
 
-    render(<GameClient />);
+    render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 1");
     await user.keyboard("peach{Enter}");
     expect(await screen.findByTestId("status")).toHaveTextContent(
@@ -310,19 +318,15 @@ describe("GameClient play", () => {
     expect(await screen.findByTestId("alert")).toHaveTextContent(
       "Result saved",
     );
+    expectNoHistoryRequest();
   });
 
   it("shows a persistence error and does not claim the result was saved", async () => {
     const user = userEvent.setup();
-    let historyCalls = 0;
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input);
-        if (url.endsWith("/api/history")) {
-          historyCalls += 1;
-          return jsonResponse([]);
-        }
         if (url.endsWith("/guesses")) {
           return jsonResponse(
             { error: "The latest result was not saved." },
@@ -336,15 +340,15 @@ describe("GameClient play", () => {
       }),
     );
 
-    render(<GameClient />);
+    render(<GameClient userId="player" />);
     await screen.findByText("Attempts remaining: 6");
-    const callsBeforeGuess = historyCalls;
+    expectNoHistoryRequest();
     await user.keyboard("crane{Enter}");
     expect(await screen.findByTestId("alert")).toHaveTextContent(
       "The latest result was not saved.",
     );
     expect(screen.queryByText("Result saved")).not.toBeInTheDocument();
-    expect(historyCalls).toBe(callsBeforeGuess);
+    expectNoHistoryRequest();
     expect(screen.getByText("Attempts remaining: 6")).toBeInTheDocument();
   });
 });

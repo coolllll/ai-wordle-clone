@@ -14,13 +14,14 @@ export class GameRequestError extends Error {
   }
 }
 
-export async function createGame(): Promise<PublicGame> {
+export async function createGame(userId: string): Promise<PublicGame> {
   const words = await loadWordList(wordsFile());
   const answer =
     words.answers[Math.floor(Math.random() * words.answers.length)];
   const record = createGameRecord({
     id: crypto.randomUUID(),
     answer,
+    userId,
   });
 
   await updateStore((store) => {
@@ -31,10 +32,13 @@ export async function createGame(): Promise<PublicGame> {
   return toPublicGame(record);
 }
 
-export async function getPublicGame(id: string): Promise<PublicGame> {
+export async function getPublicGame(
+  id: string,
+  userId: string,
+): Promise<PublicGame> {
   const store = await readStore();
   const game = store.games.find((item) => item.id === id);
-  if (!game) {
+  if (!game || game.userId !== userId) {
     throw new GameRequestError(404, "Game not found.");
   }
   return toPublicGame(game);
@@ -43,6 +47,7 @@ export async function getPublicGame(id: string): Promise<PublicGame> {
 export async function submitGuess(
   id: string,
   guess: unknown,
+  userId: string,
 ): Promise<PublicGame> {
   if (typeof guess !== "string") {
     throw new GameRequestError(
@@ -55,7 +60,7 @@ export async function submitGuess(
   const allowed = new Set(words.allowed);
   const store = await updateStore((current) => {
     const index = current.games.findIndex((item) => item.id === id);
-    if (index < 0) {
+    if (index < 0 || current.games[index]?.userId !== userId) {
       throw new GameRequestError(404, "Game not found.");
     }
 
@@ -81,9 +86,9 @@ export async function submitGuess(
   return toPublicGame(game);
 }
 
-export async function getHistory(): Promise<HistoryEntry[]> {
+export async function getHistory(userId: string): Promise<HistoryEntry[]> {
   const store = await readStore();
-  return toHistory(store.games);
+  return toHistory(store.games, userId);
 }
 
 export function isStorageError(error: unknown): error is StorageError {

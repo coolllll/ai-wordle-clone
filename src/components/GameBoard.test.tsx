@@ -29,4 +29,30 @@ describe("GameBoard", () => {
     });
     expect(board.scrollWidth).toBeLessThanOrEqual(board.clientWidth);
   });
+
+  it("uses a different color set for correct, present, and absent tiles", () => {
+    render(
+      <GameBoard
+        rows={[
+          [
+            { letter: "c", state: "correct" },
+            { letter: "r", state: "present" },
+            { letter: "a", state: "absent" },
+            { letter: "", state: "empty" },
+            { letter: "e", state: "filled" },
+          ],
+        ]}
+      />,
+    );
+    const correct = screen.getByTestId("tile-0-0").className;
+    const present = screen.getByTestId("tile-0-1").className;
+    const absent = screen.getByTestId("tile-0-2").className;
+    expect(correct).toContain("bg-correct");
+    expect(correct).toContain("text-on-correct");
+    expect(present).toContain("bg-present");
+    expect(present).toContain("text-on-present");
+    expect(absent).toContain("bg-absent");
+    expect(absent).toContain("text-on-absent");
+    expect(new Set([correct, present, absent]).size).toBe(3);
+  });
 });

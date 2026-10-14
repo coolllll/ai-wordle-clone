@@ -1,11 +1,11 @@
 import type { BoardCell, BoardTileState } from "@/lib/board";
 
 const TILE_CLASS: Record<BoardTileState, string> = {
-  correct: "border-success bg-success text-success-content",
-  present: "border-warning bg-warning text-warning-content",
-  absent: "border-neutral bg-neutral text-neutral-content",
-  filled: "border-base-content bg-base-100 text-base-content",
-  empty: "border-base-300 bg-base-100 text-base-content",
+  correct: "border-correct bg-correct text-on-correct",
+  present: "border-present bg-present text-on-present",
+  absent: "border-absent bg-absent text-on-absent",
+  filled: "border-ink bg-surface text-ink",
+  empty: "border-line bg-surface text-ink",
 };
 
 export function GameBoard({ rows }: { rows: BoardCell[][] }) {

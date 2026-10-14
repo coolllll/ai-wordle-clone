@@ -8,15 +8,18 @@ afterEach(() => {
 });
 
 describe("AppShell", () => {
-  it("renders a daisyUI control for the emerald theme", () => {
+  it("renders an actionable History link without daisyUI button classes", () => {
     render(
-      <AppShell>
+      <AppShell username="ada">
         <p>Play</p>
       </AppShell>,
     );
+    expect(screen.getByTestId("current-user")).toHaveTextContent("ada");
+    expect(screen.getByRole("button", { name: "Log out" })).toBeInTheDocument();
     const history = screen.getByRole("link", { name: "History" });
-    expect(history.className).toContain("btn");
-    expect(history.className).toContain("btn-primary");
+    expect(history).toHaveAttribute("href", "/history");
+    expect(history.className).not.toContain("btn");
+    expect(history.className).not.toContain("btn-primary");
     expect(document.documentElement.innerHTML).toContain("Play");
   });
 });

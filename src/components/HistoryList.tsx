@@ -4,7 +4,7 @@ import type { HistoryEntry } from "@/lib/types";
 export function HistoryList({ entries }: { entries: HistoryEntry[] }) {
   if (entries.length === 0) {
     return (
-      <p data-testid="history-empty" className="text-base-content/70">
+      <p data-testid="history-empty" className="text-ink/70">
         No completed games yet.
       </p>
     );
@@ -19,9 +19,9 @@ export function HistoryList({ entries }: { entries: HistoryEntry[] }) {
         <li
           key={entry.id}
           data-testid="history-entry"
-          className="card w-full bg-base-100 shadow-sm"
+          className="w-full min-w-0 rounded-md border border-line bg-surface shadow-sm"
         >
-          <div className="card-body gap-1 p-4">
+          <div className="flex flex-col gap-1 p-4">
             <time dateTime={entry.completedAt}>
               {formatCompletedAt(entry.completedAt)}
             </time>

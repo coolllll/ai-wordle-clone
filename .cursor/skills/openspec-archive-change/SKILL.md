@@ -206,6 +206,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 ```
 
 **Guardrails**
+- Do not create or switch git branches. Archive on the current branch.
 - Announce the selected change; prompt for selection when it is ambiguous
 - Use artifact graph (openspec status --json) for completion checking
 - Don't block archive on warnings - just inform and confirm

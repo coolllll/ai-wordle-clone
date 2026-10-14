@@ -1,6 +1,22 @@
 @import "tailwindcss";
-@plugin "daisyui" {
-  themes: emerald --default;
+
+@theme {
+  --color-page: #ecfdf5;
+  --color-surface: #ffffff;
+  --color-ink: #064e3b;
+  --color-line: #a7f3d0;
+  --color-primary: #059669;
+  --color-on-primary: #ffffff;
+  --color-correct: #047857;
+  --color-on-correct: #ffffff;
+  --color-present: #d97706;
+  --color-on-present: #ffffff;
+  --color-absent: #57534e;
+  --color-on-absent: #ffffff;
+  --color-success: #d1fae5;
+  --color-on-success: #065f46;
+  --color-error: #fee2e2;
+  --color-on-error: #991b1b;
 }
 
 body {

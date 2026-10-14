@@ -173,7 +173,11 @@ export function GameClient() {
         <div
           role="alert"
           data-testid="alert"
-          className={`alert ${alert.kind === "error" ? "alert-error" : "alert-success"}`}
+          className={`rounded-md border px-4 py-3 ${
+            alert.kind === "error"
+              ? "border-on-error bg-error text-on-error"
+              : "border-on-success bg-success text-on-success"
+          }`}
         >
           <span>{alert.text}</span>
         </div>
@@ -187,7 +191,7 @@ export function GameClient() {
       {game.status !== "playing" ? (
         <button
           type="button"
-          className="btn btn-primary"
+          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 font-semibold text-on-primary"
           data-testid="new-game"
           onClick={() => void onNewGame()}
         >

@@ -3,10 +3,13 @@ import type { TileState } from "@/lib/types";
 const ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"] as const;
 
 const KEY_CLASS: Record<TileState, string> = {
-  correct: "btn-success",
-  present: "btn-warning",
-  absent: "btn-neutral",
+  correct: "border-correct bg-correct text-on-correct",
+  present: "border-present bg-present text-on-present",
+  absent: "border-absent bg-absent text-on-absent",
 };
+
+const KEY_BASE =
+  "inline-flex h-11 min-w-0 flex-1 items-center justify-center rounded-md border px-0 text-xs font-semibold uppercase disabled:opacity-40";
 
 export function Keyboard({
   letterStates,
@@ -33,7 +36,9 @@ export function Keyboard({
                 testId={`key-${letter}`}
                 state={state ?? "unknown"}
                 disabled={disabled}
-                className={state ? KEY_CLASS[state] : "btn-outline"}
+                className={
+                  state ? KEY_CLASS[state] : "border-line bg-surface text-ink"
+                }
                 onKey={onKey}
                 value={letter}
               />
@@ -47,7 +52,7 @@ export function Keyboard({
           testId="key-enter"
           state="unknown"
           disabled={disabled}
-          className="btn-primary flex-[1.4]"
+          className="flex-[1.4] border-primary bg-primary text-on-primary"
           onKey={onKey}
           value="enter"
         />
@@ -56,7 +61,7 @@ export function Keyboard({
           testId="key-delete"
           state="unknown"
           disabled={disabled}
-          className="btn-outline flex-[1.4]"
+          className="flex-[1.4] border-line bg-surface text-ink"
           onKey={onKey}
           value="backspace"
         />
@@ -88,7 +93,7 @@ function KeyButton({
       data-testid={testId}
       data-state={state}
       disabled={disabled}
-      className={`btn btn-sm min-w-0 flex-1 px-0 uppercase ${className}`}
+      className={`${KEY_BASE} ${className}`}
       onClick={() => onKey(value)}
     >
       {label}

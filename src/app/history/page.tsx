@@ -14,7 +14,11 @@ export default async function HistoryPage() {
     );
   } catch {
     return (
-      <div role="alert" data-testid="alert" className="alert alert-error">
+      <div
+        role="alert"
+        data-testid="alert"
+        className="rounded-md border border-on-error bg-error px-4 py-3 text-on-error"
+      >
         <span>The latest result was not saved.</span>
       </div>
     );

@@ -46,16 +46,24 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
 ## Planning a Change
 
-When the user is planning a change, guide them toward shared understanding with focused discovery questions. For open-ended discussion, follow the conversation without imposing an interview or a required output.
+**Planning interview gate (`grill-me`):**
+
+When the user is planning a change or sharpening a plan or design, invoke the `grill-me` skill and follow it until the decision tree is empty. Do not copy the `grilling` interview procedure into this file. `grill-me` delegates to `grilling`. Ask the person in Thai. While `grill-me` is active, its rules override asking one question at a time and stopping when there is enough clarity.
+
+Code investigation, open questions that are not plan or design decisions, and fact-finding keep the explore stance below and do not run `grill-me`. Classify that from the user's message. Look up facts the interview needs instead of asking the person for them.
+
+Shared understanding is not permission to write. After the person confirms shared understanding, do not write planning artifacts until they request that capture or answer yes to writing a named set.
 
 Before asking a factual question, follow the context discovery below and inspect relevant OpenSpec artifacts, source, tests, docs, and configuration. Do not ask the user to repeat facts you can verify. Summarize relevant findings without reproducing private context or rules. If evidence is missing, conflicting, or inaccessible, state that limitation and ask only for the clarification needed to proceed.
+
+The question style below applies to code investigation, open questions, and fact-finding. It does not apply while `grill-me` is active.
 
 - **Follow dependencies** - Resolve the next blocking decision before its dependent details. For example, clarify the user's outcome and scope before choosing an API or data model. Revisit downstream assumptions when an earlier answer changes. Skip branches that do not matter to this goal.
 - **Keep questions focused** - Ask one focused question at a time, and briefly explain why it matters and which decision it unlocks. Batch questions only if the user asks for a batch; keep them small and group related decisions.
 - **Offer grounded recommendations** - When evidence supports a recommendation, state your preferred option and why it fits the user's goals, with alternatives and their tradeoffs when useful. Do not invent intent, priorities, or external constraints: ask the user when only they can answer. Avoid a fixed question format.
 - **Keep a conversational record** - Track decisions in the conversation, not in files. Separate confirmed decisions from proposed defaults and unresolved questions. Silence is not acceptance. Accepting an answer or a batch of recommendations is not permission to write. Keep file-write confirmation separate from discovery questions and follow the guardrails below.
 
-Stop asking when the user has enough clarity. Let them pause, pivot, or defer a decision; do not exhaust every branch or force a proposal.
+When `grill-me` is not active, stop asking when the user has enough clarity. Let them pause, pivot, or defer a decision; do not exhaust every branch or force a proposal.
 
 For example, after inspecting the relevant code:
 

@@ -25,9 +25,11 @@ Subagent (general-purpose):
     **Base:** [BASE_SHA]
     **Head:** [HEAD_SHA]
 
+    Review only unarchived work. Exclude `openspec/changes/archive/` from the diff, the requirements, and the findings. Limit the review to active changes under `openspec/changes/` (not `archive/`) and the code, specs, and tests those changes cover. If nothing unarchived remains, say so and stop.
+
     ```bash
-    git diff --stat [BASE_SHA]..[HEAD_SHA]
-    git diff [BASE_SHA]..[HEAD_SHA]
+    git diff --stat [BASE_SHA]..[HEAD_SHA] -- . ':(exclude)openspec/changes/archive'
+    git diff [BASE_SHA]..[HEAD_SHA] -- . ':(exclude)openspec/changes/archive'
     ```
 
     ## The spec is a vision document

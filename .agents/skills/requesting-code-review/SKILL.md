@@ -1,25 +1,29 @@
 ---
 name: requesting-code-review
-description: Use when completing tasks, implementing major features, or before merging to verify work meets requirements
+description: Manual code review of unarchived work only. Use only when the user explicitly asks for a review or runs /review. Do not auto-invoke when completing tasks, opening a pull request, or before merging.
+disable-model-invocation: true
 ---
 
 # Requesting Code Review
 
 Dispatch a code reviewer subagent to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation — never your session's history.
 
-**Core principle:** Review early, review often.
+**Core principle:** Run only on a manual trigger, and review only unarchived work.
 
 ## When to Request Review
 
-**Mandatory:**
-- After each task in subagent-driven development
-- After completing major feature
-- Before merge to main
+Run this skill only when the user explicitly asks for a review or runs `/review`.
 
-**Optional but valuable:**
-- When stuck (fresh perspective)
-- Before refactoring (baseline check)
-- After fixing complex bug
+Do not run it because a task finished, a feature is complete, a pull request is being opened, or work is about to merge. Those are not triggers.
+
+## Review scope
+
+Review only unarchived work:
+
+- Active OpenSpec changes under `openspec/changes/`, excluding `openspec/changes/archive/`
+- Code, specs, and tests that those active changes cover
+
+Do not review archived changes. Leave `openspec/changes/archive/` out of the diff, the requirements, and the findings. If the only diff is archived work, say there is nothing unarchived to review and stop.
 
 ## How to Request
 
@@ -48,9 +52,9 @@ Dispatch a `general-purpose` subagent, filling the template at [code-reviewer.md
 ## Example
 
 ```
-[Just completed Task 2: Add verification function]
+[The user runs /review]
 
-You: Let me request code review before proceeding.
+You: The user asked for a review. Review only the unarchived change.
 
 BASE_SHA=$(git log --oneline | grep "Task 1" | head -1 | cut -d' ' -f1)
 HEAD_SHA=$(git rev-parse HEAD)
@@ -82,8 +86,9 @@ You: [Fix progress indicators]
 ## Red Flags
 
 **Never:**
-- Skip review because "it's simple"
-- Ignore Critical issues
+- Start this skill without an explicit user request or `/review`
+- Review archived changes under `openspec/changes/archive/`
+- Ignore Critical issues in the unarchived work the user asked to review
 - Proceed with unfixed Important issues
 - Argue with valid technical feedback
 

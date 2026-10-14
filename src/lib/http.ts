@@ -1,8 +1,9 @@
+import { AccountError } from "./accounts";
 import { GameRequestError } from "./game-service";
 import { StorageError } from "./storage";
 
 export function toErrorResponse(error: unknown): Response {
-  if (error instanceof GameRequestError) {
+  if (error instanceof GameRequestError || error instanceof AccountError) {
     return Response.json({ error: error.message }, { status: error.status });
   }
 

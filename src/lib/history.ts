@@ -1,6 +1,6 @@
 import type { GameRecord, HistoryEntry } from "./types";
 
-export function toHistory(games: GameRecord[]): HistoryEntry[] {
+export function toHistory(games: GameRecord[], userId: string): HistoryEntry[] {
   return games
     .filter(
       (
@@ -9,6 +9,7 @@ export function toHistory(games: GameRecord[]): HistoryEntry[] {
         status: "won" | "failed";
         completedAt: string;
       } =>
+        game.userId === userId &&
         (game.status === "won" || game.status === "failed") &&
         game.completedAt !== null,
     )

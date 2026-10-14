@@ -10,10 +10,12 @@ afterEach(() => {
 describe("AppShell", () => {
   it("renders an actionable History link without daisyUI button classes", () => {
     render(
-      <AppShell>
+      <AppShell username="ada">
         <p>Play</p>
       </AppShell>,
     );
+    expect(screen.getByTestId("current-user")).toHaveTextContent("ada");
+    expect(screen.getByRole("button", { name: "Log out" })).toBeInTheDocument();
     const history = screen.getByRole("link", { name: "History" });
     expect(history).toHaveAttribute("href", "/history");
     expect(history.className).not.toContain("btn");

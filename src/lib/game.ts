@@ -15,9 +15,11 @@ export function createGameRecord(options: {
   id: string;
   answer: string;
   now?: Date;
+  userId?: string;
 }): GameRecord {
   return {
     id: options.id,
+    ...(options.userId ? { userId: options.userId } : {}),
     answer: options.answer,
     guesses: [],
     status: "playing",

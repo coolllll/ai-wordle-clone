@@ -157,6 +157,13 @@ function isGameRecord(value: unknown): value is GameRecord {
   if (typeof game.id !== "string" || game.id.length === 0) {
     return false;
   }
+  if (
+    "userId" in game &&
+    game.userId !== undefined &&
+    (typeof game.userId !== "string" || game.userId.length === 0)
+  ) {
+    return false;
+  }
   if (typeof game.answer !== "string" || !/^[a-z]{5}$/.test(game.answer)) {
     return false;
   }

@@ -33,6 +33,7 @@ function playing(id = "game-1"): GameRecord {
     id,
     answer: "apple",
     now: new Date("2026-01-01T00:00:00.000Z"),
+    userId: "user-1",
   });
 }
 
@@ -99,9 +100,9 @@ describe("completed game records", () => {
     const reloaded = await readStore();
     expect(reloaded.games).toEqual([game]);
 
-    const won = await submitGuess(game.id, "apple");
+    const won = await submitGuess(game.id, "apple", "user-1");
     expect(won.status).toBe("won");
-    await expect(submitGuess(game.id, "apple")).rejects.toMatchObject({
+    await expect(submitGuess(game.id, "apple", "user-1")).rejects.toMatchObject({
       status: 409,
     });
 

@@ -1,0 +1,136 @@
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import * as fs from "node:fs/promises";
+import path from "node:path";
+import { cookies } from "next/headers";
+import { findAccountById, type PublicAccount } from "./accounts";
+import { dataDirectory } from "./storage";
+
+export const SESSION_COOKIE = "word_guess_session";
+const MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
+
+interface SessionPayload {
+  userId: string;
+  exp: number;
+}
+
+export async function createSessionToken(
+  userId: string,
+  now = Date.now(),
+): Promise<string> {
+  const payload: SessionPayload = {
+    userId,
+    exp: Math.floor(now / 1000) + MAX_AGE_SECONDS,
+  };
+  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const signature = sign(body, await sessionSecret());
+  return `${body}.${signature}`;
+}
+
+export async function userIdFromToken(
+  token: string | undefined,
+  now = Date.now(),
+): Promise<string | null> {
+  if (!token) {
+    return null;
+  }
+  const [body, signature, extra] = token.split(".");
+  if (!body || !signature || extra !== undefined) {
+    return null;
+  }
+  const expected = sign(body, await sessionSecret());
+  const actual = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expected);
+  if (
+    actual.length !== expectedBuffer.length ||
+    !timingSafeEqual(actual, expectedBuffer)
+  ) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(
+      Buffer.from(body, "base64url").toString("utf8"),
+    ) as Partial<SessionPayload>;
+    if (
+      typeof payload.userId !== "string" ||
+      payload.userId.length === 0 ||
+      typeof payload.exp !== "number" ||
+      payload.exp * 1000 <= now
+    ) {
+      return null;
+    }
+    return payload.userId;
+  } catch {
+    return null;
+  }
+}
+
+export async function userIdFromCookieHeader(
+  header: string | null,
+): Promise<string | null> {
+  return userIdFromToken(readCookie(header, SESSION_COOKIE) ?? undefined);
+}
+
+export function sessionCookieHeader(token: string): string {
+  return `${SESSION_COOKIE}=${token}; HttpOnly; Path=/; Max-Age=${MAX_AGE_SECONDS}; SameSite=Lax`;
+}
+
+export function clearSessionCookieHeader(): string {
+  return `${SESSION_COOKIE}=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax`;
+}
+
+export async function getCurrentUser(): Promise<PublicAccount | null> {
+  const jar = await cookies();
+  const userId = await userIdFromToken(jar.get(SESSION_COOKIE)?.value);
+  if (!userId) {
+    return null;
+  }
+  return findAccountById(userId);
+}
+
+function sign(body: string, secret: Buffer): string {
+  return createHmac("sha256", secret).update(body).digest("base64url");
+}
+
+async function sessionSecret(): Promise<Buffer> {
+  const filePath = path.join(dataDirectory(), "session-secret");
+  try {
+    const text = (await fs.readFile(filePath, "utf8")).trim();
+    if (text.length > 0) {
+      return Buffer.from(text, "hex");
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
+  }
+
+  const secret = randomBytes(32);
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  try {
+    await fs.writeFile(filePath, `${secret.toString("hex")}\n`, {
+      flag: "wx",
+    });
+    return secret;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
+      throw error;
+    }
+    const text = (await fs.readFile(filePath, "utf8")).trim();
+    return Buffer.from(text, "hex");
+  }
+}
+
+function readCookie(header: string | null, name: string): string | null {
+  if (!header) {
+    return null;
+  }
+  for (const part of header.split(";")) {
+    const [rawName, ...rest] = part.trim().split("=");
+    if (rawName === name) {
+      const value = rest.join("=");
+      return value.length > 0 ? value : null;
+    }
+  }
+  return null;
+}

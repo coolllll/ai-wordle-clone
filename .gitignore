@@ -42,6 +42,8 @@ next-env.d.ts
 
 # local game records
 /data/games.json
+/data/users.json
+/data/session-secret
 /data/*.tmp
 
 # tests
